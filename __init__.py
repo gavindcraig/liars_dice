@@ -21,8 +21,21 @@ class Player:
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
 
+    def get_wager(self):
+        self.show_dice()
+        v = input('Which value? ')
+        d = input('Number showing? ')
+        self.guess = {'state': int(v), 'dice': int(d)}
+        return self.guess
+
     def lose(self):
-        self.dice.pop()
+        # CURRENTLY SET UP FOR ONE PLAYER
+        if len(self.dice) > 1:
+            self.dice.pop()
+        else:
+        # TODO: CHANGE TO REMOVE PLAYER FROM GAME
+            print('Ran out of dice!')
+            exit(0)
 
 
 class Round:
@@ -40,10 +53,22 @@ class Round:
             r[s] = sum(d.state == s for d in self.game.all_dice) + r[1]
         self.results = r
 
+    def play(self):
+        # TODO: COMPLETE ONE ROUND
+        pass
+
     def print_results(self):
         """Prints a table of all results"""
         for s in range(1, self.game.sides+1):
             print(f'{s}: {self.results[s]}')
+
+    def turn(self, player):
+        # CURRENTLY SET UP FOR ONE PLAYER
+        player.get_wager()
+        if not self.check_guess(player.guess['dice'], player.guess['state']):
+            print('Incorrect guess!')
+            player.lose()
+        self.print_results()
 
     def check_guess(self, dice, value):
         return self.results[value] >= dice
