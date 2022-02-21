@@ -34,14 +34,18 @@ class Round:
             for d in p.dice:
                 d.roll()
 
+    @property
     def results(self):
-        """Prints a table of all results"""
         r = {}
         r[1] = sum(d.state == 1 for d in self.game.all_dice)
         for s in range(2, self.game.sides+1):
-            r[s] = sum(d.state == s for d in self.game.all_dice) + r[1]
-        for s in range(2, self.game.sides+1):
-            print(f'{s}: {r[s]}')
+            r[s] = sum(d.state == s for d in self.game.all_dice) + [1]
+        return r
+
+    def print_results(self):
+        """Prints a table of all results"""
+        for s in range(1, self.game.sides+1):
+            print(f'{s}: {self.results[s]}')
 
 
 class Game:
