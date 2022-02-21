@@ -15,7 +15,8 @@ class Die:
 class Player:
     """A class representing a player"""
 
-    def __init__(self):
+    def __init__(self, human=True):
+        self.human = human
         self.dice = []
 
     def show_dice(self):
