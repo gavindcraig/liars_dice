@@ -36,7 +36,7 @@ class Round:
 
 
 def main():
-    for i in range(20,0,-1):
+    for i in range(20,1,-1):
         r = Round(dice=i, players=4)
         r.results()
         print('-'*20)
