@@ -33,19 +33,20 @@ class Round:
         for p in game.players:
             for d in p.dice:
                 d.roll()
-
-    @property
-    def results(self):
+        # STORE RESULTS IN DICT
         r = {}
         r[1] = sum(d.state == 1 for d in self.game.all_dice)
         for s in range(2, self.game.sides+1):
-            r[s] = sum(d.state == s for d in self.game.all_dice) + [1]
-        return r
+            r[s] = sum(d.state == s for d in self.game.all_dice) + r[1]
+        self.results = r
 
     def print_results(self):
         """Prints a table of all results"""
         for s in range(1, self.game.sides+1):
             print(f'{s}: {self.results[s]}')
+
+    def check_guess(self, dice, value):
+        return self.results[value] >= dice
 
 
 class Game:
@@ -74,6 +75,7 @@ class Game:
         #     loser = self.players[random.randint(1, len(self.players))]
         #     loser.lose()
         #     print('-'*20)
+        pass
 
     @property
     def all_dice(self):
@@ -89,6 +91,7 @@ class Game:
 
 def main():
     # Game(20, 4).play()
+    pass
 
 
 if __name__ == "__main__":
