@@ -15,8 +15,9 @@ class Die:
 class Player:
     """A class representing a player"""
 
-    def __init__(self, name, human=True):
-        self.name = name
+    def __init__(self, name=None, human=True):
+        # TODO: ALLOW ENTRY OF NAME FOR HUMAN PLAYERS
+        self.name = name if name else names.get_first_name()
         self.human = human
         self.dice = []
         self.active = True
@@ -116,6 +117,7 @@ class Game:
 
 
 def main():
+    # TODO: INPUT NUMBER OF PLAYERS AND DICE
     Game(20, 4).play()
 
 
