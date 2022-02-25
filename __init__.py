@@ -69,7 +69,6 @@ class Round:
         if not self.check_guess(player.guess['dice'], player.guess['state']):
             print('Incorrect guess!')
             player.lose()
-        self.print_results()
 
     def check_guess(self, dice, value):
         return self.results[value] >= dice
@@ -95,13 +94,11 @@ class Game:
 
     def play(self):
         # TODO
-        # for i in range(self.no_dice,1,-1):
-        #     r = Round(self)
-        #     r.results()
-        #     loser = self.players[random.randint(1, len(self.players))]
-        #     loser.lose()
-        #     print('-'*20)
-        pass
+        while self.no_dice > 1:
+            r = Round(self)
+            for p in self.players:
+                r.turn(p)
+            r.print_results()
 
     @property
     def all_dice(self):
@@ -116,8 +113,7 @@ class Game:
 
 
 def main():
-    # Game(20, 4).play()
-    pass
+    Game(20, 4).play()
 
 
 if __name__ == "__main__":
