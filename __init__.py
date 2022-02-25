@@ -1,4 +1,4 @@
-import random
+import random, names
 
 
 class Die:
@@ -15,9 +15,11 @@ class Die:
 class Player:
     """A class representing a player"""
 
-    def __init__(self, human=True):
+    def __init__(self, name, human=True):
+        self.name = name
         self.human = human
         self.dice = []
+        self.active = True
 
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
@@ -34,7 +36,8 @@ class Player:
         if len(self.dice) > 1:
             self.dice.pop()
         else:
-        # TODO: CHANGE TO REMOVE PLAYER FROM GAME
+            self.active = False
+            # TODO: CHANGE TO REMOVE PLAYER FROM GAME
             print('Ran out of dice!')
             exit(0)
 
@@ -96,7 +99,7 @@ class Game:
         # TODO
         while self.no_dice > 1:
             r = Round(self)
-            for p in self.players:
+            for p in filter(lambda x: x.active, self.players):
                 r.turn(p)
             r.print_results()
 
