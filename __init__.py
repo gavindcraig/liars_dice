@@ -1,4 +1,5 @@
 import random, names
+# TODO: CONSIDER USING PYINQUIRER
 
 
 class Die:
@@ -29,7 +30,7 @@ class Player:
         if self.human:
             # TODO: CORRECT PLURAL, SPELL DIE STATE
             q = f'CURRENT WAGER: {wager["dice"]} {wager["state"]}s\n'
-            q += '(c)all or (b)id?'
+            q += '(c)all or (b)id?\n'
             action = input(q)
         # TODO: FUNCTION FOR AI
         if action[0].lower() == 'c':
@@ -38,10 +39,10 @@ class Player:
             new_wager = {'state': 0, 'dice': 0}
             while new_wager['state'] < wager['state'] or \
                 new_wager['dice'] < wager['dice'] or \
-                new_wager['dice'] + new_wager['state'] == \
-                wager['dice'] + wager['state']:
-                    new_wager = self.get_wager()
-            return new_wager
+                (new_wager['dice'], new_wager['state']) == \
+                (wager['dice'], wager['state']):
+                    self.guess = self.get_wager()
+            return self.guess
 
     def get_wager(self):
         self.show_dice()
