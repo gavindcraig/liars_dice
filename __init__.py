@@ -25,11 +25,32 @@ class Player:
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
 
+    def eval_wager(self, wager):
+        if self.human:
+            # TODO: CORRECT PLURAL, SPELL DIE STATE
+            q = f'CURRENT WAGER: {wager["dice"]} {wager["state"]}s\n'
+            q += '(c)all or (b)id?'
+            action = input(q)
+        # TODO: FUNCTION FOR AI
+        if action[0].lower() == 'c':
+            return wager
+        else:
+            new_wager = {'state': 0, 'dice': 0}
+            while new_wager['state'] < wager['state'] or \
+                new_wager['dice'] < wager['dice'] or \
+                new_wager['dice'] + new_wager['state'] == \
+                wager['dice'] + wager['state']:
+                    new_wager = self.get_wager()
+            return new_wager
+
     def get_wager(self):
         self.show_dice()
-        v = input('Which value? ')
-        d = input('Number showing? ')
-        self.guess = {'state': int(v), 'dice': int(d)}
+        v = int(input('Which value? '))
+        while v > self.dice[0].sides:
+            print(f'Value must be 1-{self.dice[0].sides}!')
+            v = int(input('Which value? '))
+        d = int(input('Number showing? '))
+        self.guess = {'state': v, 'dice': d}
         return self.guess
 
     def lose(self):
@@ -40,7 +61,6 @@ class Player:
             self.active = False
             # TODO: CHANGE TO REMOVE PLAYER FROM GAME
             print('Ran out of dice!')
-            exit(0)
 
 
 class Round:
