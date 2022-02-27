@@ -1,5 +1,6 @@
 import random
 import names
+from os import system, name
 from itertools import cycle
 # TODO: CONSIDER USING PYINQUIRER
 
@@ -64,7 +65,6 @@ class Player:
             print(f'{self.name} lost one die!')
         else:
             self.active = False
-            # TODO: CHANGE TO REMOVE PLAYER FROM GAME
             print(f'{self.name} ran out of dice!')
             self.active = False
 
@@ -88,6 +88,7 @@ class Round:
         self.wager = None
         prev_p = None
         for p in cycle(players):
+            clear()
             print(f"{p.name}'s turn")
             # TAKE IN WAGER, COMPARE TO PREVIOUS
             if not self.wager:
@@ -139,6 +140,7 @@ class Game:
     def play(self):
         while self.no_dice > 1:
             r = Round(self)
+            # ONLY PLAY ACTIVE PLAYERS
             r.play(self.players)
             r.print_results()
 
@@ -152,6 +154,16 @@ class Game:
     @property
     def no_dice(self):
         return len(self.all_dice)
+
+
+def clear():
+    # for windows
+    if name == 'nt':
+        _ = system('cls')
+
+    # for mac and linux(here, os.name is 'posix')
+    else:
+        _ = system('clear')
 
 
 def main():
