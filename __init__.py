@@ -39,8 +39,10 @@ class Player:
             return wager
         else:
             new_wager = {'state': 0, 'dice': 0}
-            while new_wager['state'] < wager['state'] or new_wager['dice'] < wager['dice'] \
-                    or (new_wager['dice'], new_wager['state']) == (wager['dice'], wager['state']):
+            while new_wager['state'] < wager['state'] or \
+                    (new_wager['dice'] < wager['dice'] and
+                     new_wager['state'] <= wager['state']) \
+                    or new_wager == wager:
                 new_wager = self.get_wager()
             self.guess = new_wager
             return self.guess
