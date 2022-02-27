@@ -1,4 +1,6 @@
-import random, names
+import random
+import names
+from itertools import cycle
 # TODO: CONSIDER USING PYINQUIRER
 
 
@@ -37,11 +39,10 @@ class Player:
             return wager
         else:
             new_wager = {'state': 0, 'dice': 0}
-            while new_wager['state'] < wager['state'] or \
-                new_wager['dice'] < wager['dice'] or \
-                (new_wager['dice'], new_wager['state']) == \
-                (wager['dice'], wager['state']):
-                    self.guess = self.get_wager()
+            while new_wager['state'] < wager['state'] or new_wager['dice'] < wager['dice'] \
+                    or (new_wager['dice'], new_wager['state']) == (wager['dice'], wager['state']):
+                new_wager = self.get_wager()
+            self.guess = new_wager
             return self.guess
 
     def get_wager(self):
@@ -58,10 +59,12 @@ class Player:
         # CURRENTLY SET UP FOR ONE PLAYER
         if len(self.dice) > 1:
             self.dice.pop()
+            print(f'{self.name} lost one die!')
         else:
             self.active = False
             # TODO: CHANGE TO REMOVE PLAYER FROM GAME
-            print('Ran out of dice!')
+            print(f'{self.name} ran out of dice!')
+            self.active = False
 
 
 class Round:
@@ -79,9 +82,23 @@ class Round:
             r[s] = sum(d.state == s for d in self.game.all_dice) + r[1]
         self.results = r
 
-    def play(self):
-        # TODO: COMPLETE ONE ROUND
-        pass
+    def play(self, players):
+        self.wager = None
+        prev_p = None
+        for p in cycle(players):
+            print(f"{p.name}'s turn")
+            # TAKE IN WAGER, COMPARE TO PREVIOUS
+            if not self.wager:
+                self.wager = p.get_wager()
+            elif p.eval_wager(self.wager) == self.wager:
+                if self.check_wager(prev_p.guess):
+                    p.lose()
+                else:
+                    prev_p.lose()
+                break
+            else:
+                self.wager = p.guess
+            prev_p = p
 
     def print_results(self):
         """Prints a table of all results"""
@@ -91,12 +108,12 @@ class Round:
     def turn(self, player):
         # CURRENTLY SET UP FOR ONE PLAYER
         player.get_wager()
-        if not self.check_guess(player.guess['dice'], player.guess['state']):
+        if not self.check_wager(player.guess['dice'], player.guess['state']):
             print('Incorrect guess!')
             player.lose()
 
-    def check_guess(self, dice, value):
-        return self.results[value] >= dice
+    def check_wager(self, wager):
+        return self.results[wager['state']] >= wager['dice']
 
 
 class Game:
@@ -105,7 +122,7 @@ class Game:
     def __init__(self, no_dice, no_players, sides=6):
         self.sides = sides
         # THROW EXCEPTION IF DICE DOES NOT DIVIDE AMONG PLAYERS
-        while no_dice%no_players:
+        while no_dice % no_players:
             print("Dice cannot be evenly distributed. Enter quantities again.")
             no_dice = int(input("Number of dice: "))
             no_players = int(input("Number of players: "))
@@ -118,11 +135,9 @@ class Game:
                 self.players[i].dice.append(Die(sides))
 
     def play(self):
-        # TODO
         while self.no_dice > 1:
             r = Round(self)
-            for p in filter(lambda x: x.active, self.players):
-                r.turn(p)
+            r.play(self.players)
             r.print_results()
 
     @property
@@ -144,4 +159,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
