@@ -49,7 +49,6 @@ class Player:
             return self.guess
 
     def get_wager(self):
-        self.show_dice()
         v = int(input('Which value? '))
         while v > self.dice[0].sides:
             print(f'Value must be 1-{self.dice[0].sides}!')
@@ -91,6 +90,7 @@ class Round:
             clear()
             print(f"{p.name}'s turn")
             # TAKE IN WAGER, COMPARE TO PREVIOUS
+            p.show_dice()
             if not self.wager:
                 self.wager = p.get_wager()
             elif p.eval_wager(self.wager) == self.wager:
@@ -143,6 +143,7 @@ class Game:
             # ONLY PLAY ACTIVE PLAYERS
             r.play(self.players)
             r.print_results()
+            input('Press Enter to continue...')
 
     @property
     def all_dice(self):
