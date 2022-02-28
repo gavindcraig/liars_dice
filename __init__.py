@@ -20,22 +20,26 @@ class Player:
     """A class representing a player"""
 
     def __init__(self, name=None, human=True):
-        # TODO: ALLOW ENTRY OF NAME FOR HUMAN PLAYERS
-        self.name = name if name else names.get_first_name()
         self.human = human
+        if self.human:
+            self.name = input('Enter name: ')
+        else:
+            self.name = name if name else names.get_first_name()
+        # ASSIGN WAGER FUNCTION
+        # TODO: RANDOM FOR COMPUTER
+        self.eval_wager = self.human_eval_wager
         self.dice = []
         self.active = True
 
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
 
-    def eval_wager(self, wager):
-        if self.human:
-            # TODO: CORRECT PLURAL, SPELL DIE STATE
-            q = f'CURRENT WAGER: {wager["dice"]} {wager["state"]}s\n'
-            q += '(c)all or (b)id?\n'
-            action = input(q)
+    def human_eval_wager(self, wager):
         # TODO: FUNCTION FOR AI
+        # TODO: CORRECT PLURAL, SPELL DIE STATE
+        q = f'CURRENT WAGER: {wager["dice"]} {wager["state"]}s\n'
+        q += '(c)all or (b)id?\n'
+        action = input(q)
         if action[0].lower() == 'c':
             return wager
         else:
@@ -89,6 +93,7 @@ class Round:
         for p in cycle(players):
             clear()
             print(f"{p.name}'s turn")
+            # MOVE TO TURN?
             # TAKE IN WAGER, COMPARE TO PREVIOUS
             p.show_dice()
             if not self.wager:
@@ -132,18 +137,25 @@ class Game:
         self.players = []
         # DIVIDE DICE AMONG PLAYERS
         dice_per = int(no_dice/no_players)
-        for i in range(0, no_players):
-            self.players.append(Player())
+        # SET UP HUMAN PLAYER(S)
+        self.players.append(Player(human=True))
+        for j in range(0, dice_per):
+            self.players[0].dice.append(Die(sides))
+        # SET UP AI PLAYER(S)
+        for i in range(1, no_players):
+            self.players.append(Player(human=False))
             for j in range(0, dice_per):
                 self.players[i].dice.append(Die(sides))
 
     def play(self):
         while self.no_dice > 1:
+            # TODO: START WITH LOSING PLAYER
             r = Round(self)
             # ONLY PLAY ACTIVE PLAYERS
             r.play(self.players)
             r.print_results()
-            input('Press Enter to continue...')
+            print(f'{self.no_dice} dice remaining.')
+            input('\nPress Enter to continue...')
 
     @property
     def all_dice(self):
