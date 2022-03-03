@@ -1,5 +1,6 @@
 import random
 import names
+import time
 from os import system, name
 from itertools import cycle
 # TODO: CONSIDER USING PYINQUIRER
@@ -18,24 +19,28 @@ class Die:
 
 class Player:
     """A class representing a player"""
+    # TODO: CHANGE GUESS TO WAGER
 
     def __init__(self, name=None, human=True):
         self.human = human
         if self.human:
             self.name = input('Enter name: ')
+            self.eval_wager = self.human_eval_wager
         else:
             self.name = name if name else names.get_first_name()
-        # ASSIGN WAGER FUNCTION
-        # TODO: RANDOM FOR COMPUTER
-        self.eval_wager = self.human_eval_wager
-        self.dice = []
+            # ASSIGN WAGER FUNCTION
+            # TODO: RANDOM FOR COMPUTER
+            ai = [self.ai_eval_1,
+                  self.ai_eval_2,
+                  self.ai_eval_3]
+            self.eval_wager = ai[random.randint(0, len(ai)-1)]
         self.active = True
+        self.dice = []
 
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
 
     def human_eval_wager(self, wager):
-        # TODO: FUNCTION FOR AI
         # TODO: CORRECT PLURAL, SPELL DIE STATE
         q = f'CURRENT WAGER: {wager["dice"]} {wager["state"]}s\n'
         q += '(c)all or (b)id?\n'
@@ -50,6 +55,30 @@ class Player:
                     or new_wager == wager:
                 new_wager = self.get_wager()
             self.guess = new_wager
+            return self.guess
+
+    def ai_eval_1(self, wager):
+        # ALWAYS INCREMENT NUMBER OF DICE BY 1
+        self.guess = dict(wager)
+        self.guess['dice'] += 1
+        return self.guess
+
+    def ai_eval_2(self, wager):
+        # ALWAYS CALL
+        self.guess = dict(wager)
+        return self.guess
+
+    def ai_eval_3(self, wager):
+        if wager['state'] < self.dice[0].sides:
+            # INCREASE DIE
+            self.guess = {'dice': 1, 'state': wager['state'] + 1}
+            return self.guess
+        else:
+            # EITHER INCREMENT OR CALL
+            if random.randint(0, 1):
+                self.guess = self.ai_eval_1(wager)
+            else:
+                self.guess = self.ai_eval_2(wager)
             return self.guess
 
     def get_wager(self):
@@ -99,6 +128,7 @@ class Round:
             if not self.wager:
                 self.wager = p.get_wager()
             elif p.eval_wager(self.wager) == self.wager:
+                print(f'{p.name} CALLS!')
                 if self.check_wager(prev_p.guess):
                     p.lose()
                 else:
@@ -106,7 +136,11 @@ class Round:
                 break
             else:
                 self.wager = p.guess
+                print(f'{p.name} BIDS {self.wager["dice"]} '
+                      f'{self.wager["state"]}')
             prev_p = p
+            if not p.human:
+                time.sleep(2.5)
 
     def print_results(self):
         """Prints a table of all results"""
@@ -185,4 +219,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        clear()
+        print('Game cancelled.\n')
