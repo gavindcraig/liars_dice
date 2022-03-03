@@ -30,10 +30,10 @@ class Player:
             self.name = name if name else names.get_first_name()
             # ASSIGN WAGER FUNCTION
             # TODO: RANDOM FOR COMPUTER
-            ai = [self.ai_eval_1,
-                  self.ai_eval_2,
+            ai = [self.ai_incr,
+                  self.ai_call,
                   self.ai_eval_3]
-            self.eval_wager = ai[random.randint(0, len(ai)-1)]
+            self.eval_wager = random.choice(ai)
         self.active = True
         self.dice = []
 
@@ -57,13 +57,13 @@ class Player:
             self.guess = new_wager
             return self.guess
 
-    def ai_eval_1(self, wager):
+    def ai_incr(self, wager):
         # ALWAYS INCREMENT NUMBER OF DICE BY 1
         self.guess = dict(wager)
         self.guess['dice'] += 1
         return self.guess
 
-    def ai_eval_2(self, wager):
+    def ai_call(self, wager):
         # ALWAYS CALL
         self.guess = dict(wager)
         return self.guess
@@ -75,10 +75,10 @@ class Player:
             return self.guess
         else:
             # EITHER INCREMENT OR CALL
-            if random.randint(0, 1):
-                self.guess = self.ai_eval_1(wager)
+            if random.getrandbits(1):
+                self.guess = self.ai_incr(wager)
             else:
-                self.guess = self.ai_eval_2(wager)
+                self.guess = self.ai_call(wager)
             return self.guess
 
     def get_wager(self):
@@ -91,7 +91,6 @@ class Player:
         return self.guess
 
     def lose(self):
-        # CURRENTLY SET UP FOR ONE PLAYER
         if len(self.dice) > 1:
             self.dice.pop()
             print(f'{self.name} lost one die!')
@@ -137,7 +136,7 @@ class Round:
             else:
                 self.wager = p.guess
                 print(f'{p.name} BIDS {self.wager["dice"]} '
-                      f'{self.wager["state"]}')
+                      f'{self.wager["state"]}s')
             prev_p = p
             if not p.human:
                 time.sleep(2.5)
@@ -182,11 +181,12 @@ class Game:
                 self.players[i].dice.append(Die(sides))
 
     def play(self):
+        # BUG: DICE NOT BEING ELIMINATED
         while self.no_dice > 1:
             # TODO: START WITH LOSING PLAYER
             r = Round(self)
             # ONLY PLAY ACTIVE PLAYERS
-            r.play(self.players)
+            r.play(filter(lambda x: x.active, self.players))
             r.print_results()
             print(f'{self.no_dice} dice remaining.')
             input('\nPress Enter to continue...')
