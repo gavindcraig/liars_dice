@@ -29,10 +29,12 @@ class Player:
         else:
             self.name = name if name else names.get_first_name()
             # ASSIGN WAGER FUNCTION
-            # TODO: RANDOM FOR COMPUTER
+            self.confidence = random.random()
             ai = [self.ai_incr,
                   self.ai_call,
-                  self.ai_eval_3]
+                  self.ai_eval_3,
+                  self.ai_eval_4,
+                  ]
             self.eval_wager = random.choice(ai)
         self.active = True
         self.dice = []
@@ -69,6 +71,7 @@ class Player:
         return self.wager
 
     def ai_eval_3(self, wager):
+        # INCREASES STATE UNLESS SIX
         if wager['state'] < self.dice[0].sides:
             # INCREASE DIE
             self.wager = {'dice': 1, 'state': wager['state'] + 1}
@@ -80,6 +83,13 @@ class Player:
             else:
                 self.wager = self.ai_call(wager)
             return self.wager
+
+    def ai_eval_4(self, wager):
+        # RANDOMLY CHOOSE BETWEEN INCREASE STATE AND CALL
+        if random.random() < self.confidence:
+            return self.ai_eval_3(wager)
+        else:
+            return self.ai_call(wager)
 
     def get_wager(self):
         v = int(input('Which value? '))
@@ -215,7 +225,7 @@ def clear():
 
 def main():
     # TODO: INPUT NUMBER OF PLAYERS AND DICE
-    Game(20, 4).play()
+    Game(8, 2).play()
 
 
 if __name__ == "__main__":
