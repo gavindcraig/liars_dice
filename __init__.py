@@ -119,8 +119,8 @@ class Player:
         return self.wager
 
     def lose(self):
-        if len(self.dice) > 1:
-            self.dice.pop()
+        self.dice.pop()
+        if len(self.dice):
             print(f'{self.name} lost one die!')
         else:
             self.active = False
@@ -209,15 +209,18 @@ class Game:
                 self.players[i].dice.append(Die(sides))
 
     def play(self):
-        # BUG: DICE NOT BEING ELIMINATED
-        while self.no_dice > 1:
+        while len(self.active_players) > 1:
             # TODO: START WITH LOSING PLAYER
             r = Round(self)
             # ONLY PLAY ACTIVE PLAYERS
-            r.play(filter(lambda x: x.active, self.players))
+            r.play(self.active_players)
             r.print_results()
             print(f'{self.no_dice} dice remaining.')
-            input('\nPress Enter to continue...')
+            if len(self.active_players) > 1:
+                input('\nPress Enter to continue...')
+            else:
+                winner = self.active_players[0]
+                print(f'{winner.name} wins! Game over.')
 
     @property
     def all_dice(self):
@@ -229,6 +232,10 @@ class Game:
     @property
     def no_dice(self):
         return len(self.all_dice)
+
+    @property
+    def active_players(self):
+        return [p for p in self.players if p.active]
 
 
 def clear():
@@ -243,7 +250,7 @@ def clear():
 
 def main():
     # TODO: INPUT NUMBER OF PLAYERS AND DICE
-    Game(8, 2).play()
+    Game(6, 2).play()
 
 
 if __name__ == "__main__":
