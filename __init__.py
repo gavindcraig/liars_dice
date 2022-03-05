@@ -54,32 +54,32 @@ class Player:
                      new_wager['state'] <= wager['state']) \
                     or new_wager == wager:
                 new_wager = self.get_wager()
-            self.guess = new_wager
-            return self.guess
+            self.wager = new_wager
+            return self.wager
 
     def ai_incr(self, wager):
         # ALWAYS INCREMENT NUMBER OF DICE BY 1
-        self.guess = dict(wager)
-        self.guess['dice'] += 1
-        return self.guess
+        self.wager = dict(wager)
+        self.wager['dice'] += 1
+        return self.wager
 
     def ai_call(self, wager):
         # ALWAYS CALL
-        self.guess = dict(wager)
-        return self.guess
+        self.wager = dict(wager)
+        return self.wager
 
     def ai_eval_3(self, wager):
         if wager['state'] < self.dice[0].sides:
             # INCREASE DIE
-            self.guess = {'dice': 1, 'state': wager['state'] + 1}
-            return self.guess
+            self.wager = {'dice': 1, 'state': wager['state'] + 1}
+            return self.wager
         else:
             # EITHER INCREMENT OR CALL
             if random.getrandbits(1):
-                self.guess = self.ai_incr(wager)
+                self.wager = self.ai_incr(wager)
             else:
-                self.guess = self.ai_call(wager)
-            return self.guess
+                self.wager = self.ai_call(wager)
+            return self.wager
 
     def get_wager(self):
         v = int(input('Which value? '))
@@ -87,8 +87,8 @@ class Player:
             print(f'Value must be 1-{self.dice[0].sides}!')
             v = int(input('Which value? '))
         d = int(input('Number showing? '))
-        self.guess = {'state': v, 'dice': d}
-        return self.guess
+        self.wager = {'state': v, 'dice': d}
+        return self.wager
 
     def lose(self):
         if len(self.dice) > 1:
@@ -128,13 +128,13 @@ class Round:
                 self.wager = p.get_wager()
             elif p.eval_wager(self.wager) == self.wager:
                 print(f'{p.name} CALLS!')
-                if self.check_wager(prev_p.guess):
+                if self.check_wager(prev_p.wager):
                     p.lose()
                 else:
                     prev_p.lose()
                 break
             else:
-                self.wager = p.guess
+                self.wager = p.wager
                 print(f'{p.name} BIDS {self.wager["dice"]} '
                       f'{self.wager["state"]}s')
             prev_p = p
