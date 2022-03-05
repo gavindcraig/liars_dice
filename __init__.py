@@ -19,7 +19,6 @@ class Die:
 
 class Player:
     """A class representing a player"""
-    # TODO: CHANGE GUESS TO WAGER
 
     def __init__(self, game, human=True):
         self.game = game
@@ -44,8 +43,10 @@ class Player:
               self.ai_call,
               self.ai_eval_3,
               self.ai_eval_4,
+              self.ai_eval_5,
               ]
         self.eval_wager = random.choice(ai)
+        self.dice_guess = self.ai_dice_1
 
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
@@ -67,10 +68,10 @@ class Player:
             self.wager = new_wager
             return self.wager
 
-    def ai_incr(self, wager):
+    def ai_incr(self, wager, incr=1):
         # ALWAYS INCREMENT NUMBER OF DICE BY 1
         self.wager = dict(wager)
-        self.wager['dice'] += 1
+        self.wager['dice'] += incr
         return self.wager
 
     def ai_call(self, wager):
@@ -102,11 +103,26 @@ class Player:
     def ai_eval_5(self, wager):
         # TODO: WAGERS ACCORDING TO A GUESS AS TO THE STATE OF DICE
         dice = self.dice_guess()
-        pass
+        if wager['dice'] < dice[wager['state']]:
+            return self.ai_incr(wager)
+        else:
+            return self.ai_eval_4(wager)
 
     def ai_dice_1(self):
         # TODO: MAKES A RANDOM GUESS ABOUT THE STATE OF THE DICE
         dice = {}
+        # VALUES OF OWN DICE
+        dice[1] = sum(d.state == 1 for d in self.dice)
+        for s in range(2, self.game.sides+1):
+            dice[s] = sum(d.state == s for d in self.dice) + dice[1]
+        # RANDOM VALUES FOR OPPONENT DICE
+        for d in range(len(self.dice), self.game.no_dice):
+            side = random.randint(1, self.game.sides)
+            if side != 1:
+                dice[side] += 1
+            else:
+                for s in range(1, self.game.sides+1):
+                    dice[s] += 1
         return dice
 
     def get_wager(self):
