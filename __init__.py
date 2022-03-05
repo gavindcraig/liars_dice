@@ -21,23 +21,31 @@ class Player:
     """A class representing a player"""
     # TODO: CHANGE GUESS TO WAGER
 
-    def __init__(self, name=None, human=True):
+    def __init__(self, game, human=True):
+        self.game = game
         self.human = human
         if self.human:
-            self.name = input('Enter name: ')
-            self.eval_wager = self.human_eval_wager
+            self.init_human()
         else:
-            self.name = name if name else names.get_first_name()
-            # ASSIGN WAGER FUNCTION
-            self.confidence = random.random()
-            ai = [self.ai_incr,
-                  self.ai_call,
-                  self.ai_eval_3,
-                  self.ai_eval_4,
-                  ]
-            self.eval_wager = random.choice(ai)
+            self.init_ai()
         self.active = True
         self.dice = []
+
+    def init_human(self):
+        self.name = input('Enter name: ')
+        self.eval_wager = self.human_eval_wager
+
+    def init_ai(self):
+        self.dice_guess = {}
+        self.name = names.get_first_name()
+        # ASSIGN WAGER FUNCTION
+        self.confidence = random.random()
+        ai = [self.ai_incr,
+              self.ai_call,
+              self.ai_eval_3,
+              self.ai_eval_4,
+              ]
+        self.eval_wager = random.choice(ai)
 
     def show_dice(self):
         print(' '.join(str(d.state) for d in self.dice))
@@ -90,6 +98,16 @@ class Player:
             return self.ai_eval_3(wager)
         else:
             return self.ai_call(wager)
+
+    def ai_eval_5(self, wager):
+        # TODO: WAGERS ACCORDING TO A GUESS AS TO THE STATE OF DICE
+        dice = self.dice_guess()
+        pass
+
+    def ai_dice_1(self):
+        # TODO: MAKES A RANDOM GUESS ABOUT THE STATE OF THE DICE
+        dice = {}
+        return dice
 
     def get_wager(self):
         v = int(input('Which value? '))
@@ -181,12 +199,12 @@ class Game:
         # DIVIDE DICE AMONG PLAYERS
         dice_per = int(no_dice/no_players)
         # SET UP HUMAN PLAYER(S)
-        self.players.append(Player(human=True))
+        self.players.append(Player(game=self, human=True))
         for j in range(0, dice_per):
             self.players[0].dice.append(Die(sides))
         # SET UP AI PLAYER(S)
         for i in range(1, no_players):
-            self.players.append(Player(human=False))
+            self.players.append(Player(game=self, human=False))
             for j in range(0, dice_per):
                 self.players[i].dice.append(Die(sides))
 
