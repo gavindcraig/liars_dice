@@ -1,9 +1,13 @@
 import random
 import names
 import time
+import inflect
 from os import system, name
 from itertools import cycle
 # TODO: CONSIDER USING PYINQUIRER
+
+
+words = inflect.engine()
 
 
 class Die:
@@ -19,6 +23,7 @@ class Die:
 
 class Player:
     """A class representing a player"""
+    # TODO: CONSIDER CHANGING TO SUBCLASSES
 
     def __init__(self, game, human=True):
         self.game = game
@@ -52,8 +57,10 @@ class Player:
         print(' '.join(str(d.state) for d in self.dice))
 
     def human_eval_wager(self, wager):
-        # TODO: CORRECT PLURAL, SPELL DIE STATE
-        q = f'CURRENT WAGER: {wager["dice"]} {wager["state"]}s\n'
+        t = words.number_to_words(wager['state'])
+        if wager['state'] > 1:
+            t = words.plural(t)
+        q = f'CURRENT WAGER: {wager["dice"]} {t}\n'
         q += '(c)all or (b)id?\n'
         action = input(q)
         if action[0].lower() == 'c':
@@ -83,7 +90,9 @@ class Player:
         # INCREASES STATE UNLESS SIX
         if wager['state'] < self.dice[0].sides:
             # INCREASE DIE
-            self.wager = {'dice': 1, 'state': wager['state'] + 1}
+            dice = self.dice_guess()
+            no_dice = dice[wager['state']]
+            self.wager = {'dice': no_dice, 'state': wager['state'] + 1}
             return self.wager
         else:
             # EITHER INCREMENT OR CALL
@@ -101,7 +110,6 @@ class Player:
             return self.ai_call(wager)
 
     def ai_eval_5(self, wager):
-        # TODO: WAGERS ACCORDING TO A GUESS AS TO THE STATE OF DICE
         dice = self.dice_guess()
         if wager['dice'] < dice[wager['state']]:
             return self.ai_incr(wager)
@@ -109,7 +117,6 @@ class Player:
             return self.ai_eval_4(wager)
 
     def ai_dice_1(self):
-        # TODO: MAKES A RANDOM GUESS ABOUT THE STATE OF THE DICE
         dice = {}
         # VALUES OF OWN DICE
         dice[1] = sum(d.state == 1 for d in self.dice)
@@ -167,7 +174,8 @@ class Round:
             print(f"{p.name}'s turn")
             # MOVE TO TURN?
             # TAKE IN WAGER, COMPARE TO PREVIOUS
-            p.show_dice()
+            if p.human:
+                p.show_dice()
             if not self.wager:
                 self.wager = p.get_wager()
             elif p.eval_wager(self.wager) == self.wager:
@@ -179,8 +187,10 @@ class Round:
                 break
             else:
                 self.wager = p.wager
-                print(f'{p.name} BIDS {self.wager["dice"]} '
-                      f'{self.wager["state"]}s')
+                t = words.number_to_words(self.wager['state'])
+                if p.wager['dice'] > 1:
+                    t = words.plural(t)
+                print(f'{p.name} BIDS {self.wager["dice"]} {t}')
             prev_p = p
             if not p.human:
                 time.sleep(2.5)
@@ -266,7 +276,7 @@ def clear():
 
 def main():
     # TODO: INPUT NUMBER OF PLAYERS AND DICE
-    Game(6, 2).play()
+    Game(20, 4).play()
 
 
 if __name__ == "__main__":
