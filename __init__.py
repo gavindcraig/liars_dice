@@ -57,6 +57,8 @@ class Player:
         print(' '.join(str(d.state) for d in self.dice))
 
     def human_eval_wager(self, wager):
+        # BUG: TWOES
+        # TODO: PLURALS, SECOND ARGUMENT IS QUANTITY
         t = words.number_to_words(wager['state'])
         if wager['state'] > 1:
             t = words.plural(t)
@@ -170,27 +172,8 @@ class Round:
         self.wager = None
         prev_p = None
         for p in cycle(players):
-            clear()
-            print(f"{p.name}'s turn")
-            # MOVE TO TURN?
-            # TAKE IN WAGER, COMPARE TO PREVIOUS
-            if p.human:
-                p.show_dice()
-            if not self.wager:
-                self.wager = p.get_wager()
-            elif p.eval_wager(self.wager) == self.wager:
-                print(f'{p.name} CALLS!')
-                if self.check_wager(prev_p.wager):
-                    p.lose()
-                else:
-                    prev_p.lose()
+            if not self.turn(p, prev_p):
                 break
-            else:
-                self.wager = p.wager
-                t = words.number_to_words(self.wager['state'])
-                if p.wager['dice'] > 1:
-                    t = words.plural(t)
-                print(f'{p.name} BIDS {self.wager["dice"]} {t}')
             prev_p = p
             if not p.human:
                 time.sleep(2.5)
@@ -200,12 +183,27 @@ class Round:
         for s in range(1, self.game.sides+1):
             print(f'{s}: {self.results[s]}')
 
-    def turn(self, player):
-        # CURRENTLY SET UP FOR ONE PLAYER
-        player.get_wager()
-        if not self.check_wager(player.guess['dice'], player.guess['state']):
-            print('Incorrect guess!')
-            player.lose()
+    def turn(self, player, prev_p):
+        clear()
+        print(f"{player.name}'s turn".upper())
+        if player.human:
+            player.show_dice()
+        if not self.wager:
+            self.wager = player.get_wager()
+        elif player.eval_wager(self.wager) == self.wager:
+            print(f"{player.name} calls!".upper())
+            if self.check_wager(prev_p.wager):
+                player.lose()
+            else:
+                prev_p.lose()
+            return False
+        else:
+            self.wager = player.wager
+            t = words.number_to_words(self.wager['state'])
+            if player.wager['dice'] > 1:
+                t = words.plural(t)
+            print(f'{player.name} bids {self.wager["dice"]} {t}'.upper())
+        return True
 
     def check_wager(self, wager):
         return self.results[wager['state']] >= wager['dice']
@@ -236,6 +234,7 @@ class Game:
 
     def play(self):
         while len(self.active_players) > 1:
+            # BUG: FIRST COMPUTER PLAYER REMAINING TAKES BID
             # TODO: START WITH LOSING PLAYER
             r = Round(self)
             # ONLY PLAY ACTIVE PLAYERS
