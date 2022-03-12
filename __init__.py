@@ -8,6 +8,7 @@ from itertools import cycle
 
 
 words = inflect.engine()
+words.defnoun('two', 'twos')
 
 
 class Die:
@@ -57,11 +58,8 @@ class Player:
         print(' '.join(str(d.state) for d in self.dice))
 
     def human_eval_wager(self, wager):
-        # BUG: TWOES
-        # TODO: PLURALS, SECOND ARGUMENT IS QUANTITY
         t = words.number_to_words(wager['state'])
-        if wager['state'] > 1:
-            t = words.plural(t)
+        t = words.plural(t, wager['dice'])
         q = f'CURRENT WAGER: {wager["dice"]} {t}\n'
         q += '(c)all or (b)id?\n'
         action = input(q)
@@ -135,6 +133,7 @@ class Player:
         return dice
 
     def get_wager(self):
+        # MODIFY FOR COMPUTER
         v = int(input('Which value? '))
         while v > self.dice[0].sides:
             print(f'Value must be 1-{self.dice[0].sides}!')
