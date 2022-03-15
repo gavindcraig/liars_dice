@@ -88,6 +88,7 @@ class Player:
 
     def ai_eval_3(self, wager):
         # INCREASES STATE UNLESS SIX
+        # BUG: PREVENT FROM BIDDING ZERO
         if wager['state'] < self.dice[0].sides:
             # INCREASE DIE
             dice = self.dice_guess()
@@ -152,6 +153,45 @@ class Player:
             self.active = False
 
 
+class Human(Player):
+    """An implementation of Player for Human players"""
+    # TODO
+    def __init__(self, game):
+        # TODO: super.__init__()
+        self.game = game
+        self.human = True
+        self.name = input('Enter name: ')
+        self.active = True
+        self.dice = []
+
+    def eval_wager(self, wager):
+        t = words.number_to_words(wager['state'])
+        t = words.plural(t, wager['dice'])
+        q = f'CURRENT WAGER: {wager["dice"]} {t}\n'
+        q += '(c)all or (b)id?\n'
+        action = input(q)
+        if action[0].lower() == 'c':
+            return wager
+        else:
+            new_wager = {'state': 0, 'dice': 0}
+            while new_wager['state'] < wager['state'] or \
+                    (new_wager['dice'] < wager['dice'] and
+                     new_wager['state'] <= wager['state']) \
+                    or new_wager == wager:
+                new_wager = self.get_wager()
+            self.wager = new_wager
+            return self.wager
+
+    def get_wager(self):
+        v = int(input('Which value? '))
+        while v > self.dice[0].sides:
+            print(f'Value must be 1-{self.dice[0].sides}!')
+            v = int(input('Which value? '))
+        d = int(input('Number showing? '))
+        self.wager = {'state': v, 'dice': d}
+        return self.wager
+
+
 class Round:
     """A class representing a round"""
 
@@ -213,7 +253,7 @@ class Game:
 
     def __init__(self, no_dice, no_players, sides=6):
         self.sides = sides
-        # THROW EXCEPTION IF DICE DOES NOT DIVIDE AMONG PLAYERS
+        # RAISE EXCEPTION IF DICE DOES NOT DIVIDE AMONG PLAYERS
         while no_dice % no_players:
             print("Dice cannot be evenly distributed. Enter quantities again.")
             no_dice = int(input("Number of dice: "))
@@ -222,7 +262,7 @@ class Game:
         # DIVIDE DICE AMONG PLAYERS
         dice_per = int(no_dice/no_players)
         # SET UP HUMAN PLAYER(S)
-        self.players.append(Player(game=self, human=True))
+        self.players.append(Human(game=self))
         for j in range(0, dice_per):
             self.players[0].dice.append(Die(sides))
         # SET UP AI PLAYER(S)
@@ -234,6 +274,7 @@ class Game:
     def play(self):
         while len(self.active_players) > 1:
             # BUG: FIRST COMPUTER PLAYER REMAINING TAKES BID
+            # Need to create method for ai to create initial bid
             # TODO: START WITH LOSING PLAYER
             r = Round(self)
             # ONLY PLAY ACTIVE PLAYERS
